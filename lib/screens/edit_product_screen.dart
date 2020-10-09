@@ -49,7 +49,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
               !_imageUrlController.text.endsWith('.jpeg'))) {
         return;
       }
-      setState(() {});
+      setState(() {}); // triggers the REBUILD of the whole widget tree
     }
   }
 
