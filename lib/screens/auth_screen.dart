@@ -104,9 +104,10 @@ class _AuthCardState extends State<AuthCard>
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
-  // AnimationController _animationController;
+  AnimationController _animationController;
   // Animation<Size>
   //     _heightAnimation; // `Size` since we wanna animate the size (height)
+  Animation<double> _opacityAnimation;
 
   // in order to work with animation, we need StatefulWidget!!!!!
   @override
@@ -116,10 +117,10 @@ class _AuthCardState extends State<AuthCard>
     // to specify different duration for `forward()` and `reverse()`,
     // use `duration` & `reverseDuration`. If not specify, both will use
     // similar duration
-    // _animationController = AnimationController(
-    //   vsync: this,
-    //   duration: Duration(milliseconds: 500),
-    // );
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+    );
 
     // _heightAnimation = Tween<Size>(
     //   begin: Size(double.infinity, 260),
@@ -132,6 +133,18 @@ class _AuthCardState extends State<AuthCard>
     // _heightAnimation.addListener(() {
     //   setState(() {});
     // });
+
+    // opacity begins at 0.0 because init mode is SignIn
+    // opacity ends at 1.0 when switch mode to SignUp (`_animationController.forward()`)
+    _opacityAnimation = Tween(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeIn,
+      ),
+    );
   }
 
   @override
@@ -219,13 +232,13 @@ class _AuthCardState extends State<AuthCard>
         _authMode = AuthMode.Signup;
       });
 
-      // _animationController.forward();
+      _animationController.forward();
     } else {
       setState(() {
         _authMode = AuthMode.Login;
       });
 
-      // _animationController.reverse();
+      _animationController.reverse();
     }
   }
 
@@ -278,8 +291,9 @@ class _AuthCardState extends State<AuthCard>
                     _authData['password'] = value;
                   },
                 ),
-                if (_authMode == AuthMode.Signup)
-                  TextFormField(
+                FadeTransition(
+                  opacity: _opacityAnimation,
+                  child: TextFormField(
                     enabled: _authMode == AuthMode.Signup,
                     decoration: InputDecoration(labelText: 'Confirm Password'),
                     obscureText: true,
@@ -291,6 +305,7 @@ class _AuthCardState extends State<AuthCard>
                           }
                         : null,
                   ),
+                ),
                 SizedBox(
                   height: 20,
                 ),
